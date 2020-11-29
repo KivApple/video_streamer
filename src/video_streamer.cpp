@@ -103,7 +103,7 @@ void video_streamer::stream_server::send(const void *data, size_t data_size) {
 			offset += r;
 		}
 		if (offset < data_size) {
-			LOG(INFO) << "The client disconnected" << strerror(errno);
+			LOG(INFO) << "The client disconnected: " << strerror(errno);
 			it = m_client_sockets.erase(it);
 		} else {
 			++it;
