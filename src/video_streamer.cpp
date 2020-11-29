@@ -93,16 +93,17 @@ void video_streamer::stream_server::send(const void *data, size_t data_size) {
 	std::unique_lock<std::mutex> lock(m_client_sockets_mutex);
 	auto it = m_client_sockets.begin();
 	while (it != m_client_sockets.end()) {
+		errno = 0;
 		size_t offset = 0;
 		while (offset < data_size) {
-			ssize_t r = ::send(*it, (const char*) data + offset, data_size - offset, 0);
+			ssize_t r = ::send(*it, (const char*) data + offset, data_size - offset, MSG_NOSIGNAL);
 			if (r <= 0) {
 				break;
 			}
 			offset += r;
 		}
 		if (offset < data_size) {
-			LOG(INFO) << "The client disconnected";
+			LOG(INFO) << "The client disconnected" << strerror(errno);
 			it = m_client_sockets.erase(it);
 		} else {
 			++it;
@@ -212,8 +213,8 @@ static void setup_signal_handlers() {
 	sigint_action.sa_handler = sigint_handler;
 	sigaction(SIGINT, &sigint_action, &prev_sigint_handler);
 	
-	sigint_action.sa_handler = SIG_IGN;
-	sigaction(SIGPIPE, &sigint_action, nullptr);
+	/* sigint_action.sa_handler = SIG_IGN;
+	sigaction(SIGPIPE, &sigint_action, nullptr); */
 }
 
 static std::atomic<int> frame_counter, byte_counter, jpeg_quality(80);
