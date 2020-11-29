@@ -24,6 +24,10 @@ Log configuration file uses [EasyLogging++ configuration format](https://github.
 You can play the stream using [VLC](https://www.videolan.org/) (or any other compatible player). 
 Just click "File" -> "Open Network Stream..." and enter a URL like `tcp://127.0.0.1:1234`.
 
+You can also use [ffplay](https://ffmpeg.org/ffplay.html) utility:
+
+    ffplay -fflags nobuffer -framerate 30 tcp://127.0.0.1:1234/
+
 ## Library usage
 
     #include <easylogging++.h>
