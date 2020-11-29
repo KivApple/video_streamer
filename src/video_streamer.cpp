@@ -26,8 +26,8 @@ video_streamer::image_buffer::image_buffer(size_t size): video_streamer::image_b
 }
 
 video_streamer::stream_server::stream_server(
-		std::vector<std::string> server_addresses
-): std::thread(&stream_server::run, this) {
+		std::vector<std::string> server_addresses, int send_buffer_size
+): std::thread(&stream_server::run, this), m_send_buffer_size(send_buffer_size) {
 	std::unique_lock<std::mutex> lock(m_client_sockets_mutex);
 	int one = 1;
 	for (auto &address : server_addresses) {
@@ -142,6 +142,11 @@ void video_streamer::stream_server::accept_client(posix::unique_fd &server_socke
 			((sockaddr_in*) &socket_addr)->sin_port
 	);
 	LOG(INFO) << "New client connected from " << address << ", port " << port;
+	if (m_send_buffer_size > 0) {
+		if (setsockopt(socket, SOL_SOCKET, SO_SNDBUF, &m_send_buffer_size, sizeof(int)) < 0) {
+			LOG(WARNING) << "Unable to update socket send buffer size";
+		}
+	}
 	std::unique_lock<std::mutex> lock(m_client_sockets_mutex);
 	m_client_sockets.push_back(std::move(socket));
 }
@@ -228,6 +233,7 @@ int video_streamer::main(int argc, char **argv, std::function<uncompressed_frame
 	const char *log_config_file = nullptr;
 	bool trace_libjpeg = false;
 	int target_bitrate = -1;
+	int send_buffer_size = -1;
 	for (auto i = 0; i < argc; i++) {
 		std::string arg(argv[i]);
 		if (arg == "--listen" && i < argc - 1) {
@@ -246,6 +252,8 @@ int video_streamer::main(int argc, char **argv, std::function<uncompressed_frame
 			trace_libjpeg = true;
 		} else if (arg == "--target-bitrate") {
 			target_bitrate = atoi(argv[++i]);
+		} else if (arg == "--send-buffer" && i < argc - 1) {
+			send_buffer_size = atoi(argv[++i]);
 		} else if (!arg.empty()) {
 			std::cerr << "Invalid command line argument: " << arg << std::endl;
 		}
@@ -258,6 +266,7 @@ int video_streamer::main(int argc, char **argv, std::function<uncompressed_frame
 		std::cerr << "\t" << "--log-config FILE-NAME" << std::endl;
 		std::cerr << "\t" << "--trace-libjpeg" << std::endl;
 		std::cerr << "\t" << "--bitrate NNN" << std::endl;
+		std::cerr << "\t" << "--send-buffer NNN" << std::endl;
 		return EXIT_SUCCESS;
 	}
 	configure_loggers(log_config_file, trace_libjpeg);
@@ -267,7 +276,7 @@ int video_streamer::main(int argc, char **argv, std::function<uncompressed_frame
 	LOG(INFO) << "Capture size is " << device.frame_width() << "x" << device.frame_height();
 	LOG(INFO) << "Capture pixel format is " << device.pixel_format();
 	
-	video_streamer::stream_server server(listen_addresses);
+	video_streamer::stream_server server(listen_addresses, send_buffer_size);
 	
 	std::vector<std::thread> stream_threads;
 	stream_threads.reserve(std::thread::hardware_concurrency());

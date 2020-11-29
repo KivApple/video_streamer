@@ -15,6 +15,7 @@ This software requires Linux and v4l2-compatible webcam.
 
     video_streamer [--width NNN] [--height NNN] 
         [--stats] [--log-config FILE-NAME] 
+        [--trace-libjpeg] [--send-buffer NNN]
         --device /dev/video0 
         --listen 127.0.0.1:1234 --listen [::]:1234
 

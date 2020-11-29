@@ -140,12 +140,13 @@ namespace video_streamer {
 		std::vector<posix::unique_fd> m_client_sockets;
 		std::mutex m_client_sockets_mutex;
 		bool m_quit = false;
+		int m_send_buffer_size;
 		
 		void run();
 		void accept_client(posix::unique_fd &server_socket);
 		
 	public:
-		explicit stream_server(std::vector<std::string> server_addresses);
+		explicit stream_server(std::vector<std::string> server_addresses, int sendBufferSize = -1);
 		~stream_server();
 		void send(const void *data, size_t data_size);
 		void send(const image_buffer &buffer);
