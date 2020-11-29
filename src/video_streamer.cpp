@@ -102,6 +102,7 @@ void video_streamer::stream_server::send(const void *data, size_t data_size) {
 			offset += r;
 		}
 		if (offset < data_size) {
+			LOG(INFO) << "The client disconnected";
 			it = m_client_sockets.erase(it);
 		} else {
 			++it;
@@ -206,10 +207,13 @@ static void sigint_handler(int sig) {
 	}
 }
 
-static void setup_sigint_handler() {
+static void setup_signal_handlers() {
 	struct sigaction sigint_action = {};
 	sigint_action.sa_handler = sigint_handler;
 	sigaction(SIGINT, &sigint_action, &prev_sigint_handler);
+	
+	sigint_action.sa_handler = SIG_IGN;
+	sigaction(SIGPIPE, &sigint_action, nullptr);
 }
 
 static std::atomic<int> frame_counter, byte_counter, jpeg_quality(80);
@@ -292,7 +296,7 @@ int video_streamer::main(int argc, char **argv, std::function<uncompressed_frame
 		});
 	}
 	
-	setup_sigint_handler();
+	setup_signal_handlers();
 	while (running) {
 		sleep(1);
 		if (show_stats) {
