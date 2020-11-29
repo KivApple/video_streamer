@@ -1,5 +1,4 @@
 #include <easylogging++.h>
-#include <thread>
 #include "v4l2_device.h"
 
 INITIALIZE_EASYLOGGINGPP

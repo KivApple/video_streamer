@@ -178,6 +178,7 @@ void video_streamer::stream_server::run() {
 
 static void configure_loggers(const char *config_file_name, bool traceLibJpeg) {
 	el::Configurations conf;
+	conf.setGlobally(el::ConfigurationType::Filename, "video_streamer.log");
 	conf.setGlobally(
 			el::ConfigurationType::Format,
 			"%datetime{%Y-%M-%d %H:%m:%s.%g} [%level] [%logger] %msg"
