@@ -273,10 +273,11 @@ int video_streamer::main(int argc, char **argv, std::function<uncompressed_frame
 					auto frame = device.read_jpeg();
 					if (frame_processor) {
 						auto processed_frame = frame_processor(frame.uncompress(JCS_RGB, 3));
-						server.send(jpeg_frame(
+						auto compressed_frame = jpeg_frame(
 								processed_frame, JCS_RGB, 3, jpeg_quality
-						));
-						byte_counter += (int) processed_frame.buffer().size();
+						);
+						server.send(compressed_frame);
+						byte_counter += (int) compressed_frame.buffer().size();
 					} else {
 						// TODO: Recompress JPEG if the frame is exceed target bitrate
 						server.send(frame);
