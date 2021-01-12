@@ -9,10 +9,9 @@ file(
 		"${CMAKE_BINARY_DIR}/easyloggingpp/v${EasyLoggingPP_FIND_VERSION}.zip"
 		SHOW_PROGRESS
 )
-file(
-		ARCHIVE_EXTRACT
-		INPUT "${CMAKE_BINARY_DIR}/easyloggingpp/v${EasyLoggingPP_FIND_VERSION}.zip"
-		DESTINATION "${CMAKE_BINARY_DIR}/easyloggingpp"
+execute_process(
+		COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_BINARY_DIR}/easyloggingpp/v${EasyLoggingPP_FIND_VERSION}.zip"
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/easyloggingpp"
 )
 set(EasyLoggingPP_ROOT_DIR "${CMAKE_BINARY_DIR}/easyloggingpp/easyloggingpp-${EasyLoggingPP_FIND_VERSION}")
 
