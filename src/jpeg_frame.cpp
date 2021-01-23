@@ -77,7 +77,7 @@ video_streamer::image_buffer video_streamer::jpeg_frame::compress_frame(
 ) {
 	libjpeg_instance<jpeg_compressor_impl> compressor;
 	uint8_t *buffer = nullptr;
-	size_t bufferSize = 0;
+	unsigned long bufferSize = 0;
 	jpeg_mem_dest(compressor.get(), &buffer, &bufferSize);
 	compressor.get()->image_width = frame.width();
 	compressor.get()->image_height = frame.height();
